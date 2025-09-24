@@ -24,20 +24,7 @@
     <input type="text" id="searchInput" placeholder="Search movies..." onkeyup="filterMovies()">
   </div>
 
-  <div class="movies" id="movieList">
-    <div class="movie" onclick="playMovie('550')">
-      <img src="https://image.tmdb.org/t/p/w300/bptfVGEQuv6vDTIMVCHjJ9Dz8PX.jpg">
-      <p>Fight Club</p>
-    </div>
-    <div class="movie" onclick="playMovie('299536')">
-      <img src="https://image.tmdb.org/t/p/w300/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg">
-      <p>Avengers: Infinity War</p>
-    </div>
-    <div class="movie" onclick="playMovie('299534')">
-      <img src="https://image.tmdb.org/t/p/w300/or06FN3Dka5tukK1e9sl16pB3iy.jpg">
-      <p>Avengers: Endgame</p>
-    </div>
-  </div>
+  <div class="movies" id="movieList"></div>
 
   <div id="player-container">
     <h2>Now Playing</h2>
@@ -45,18 +32,60 @@
   </div>
 
   <script>
-    function playMovie(id) {
-      document.getElementById("player").src = `https://vidking.net/embed/movie/${id}`;
-    }
+    // Database of movies (Popular, Action, Horror)
+    const movies = [
+      // 🎬 Popular
+      { id: "603692", title: "John Wick: Chapter 4", poster: "https://image.tmdb.org/t/p/w300/vZloFAK7NmvMGKE7VkF5UHaz0I.jpg", genre: "Action" },
+      { id: "299534", title: "Avengers: Endgame", poster: "https://image.tmdb.org/t/p/w300/or06FN3Dka5tukK1e9sl16pB3iy.jpg", genre: "Action" },
+      { id: "155", title: "The Dark Knight", poster: "https://image.tmdb.org/t/p/w300/qJ2tW6WMUDux911r6m7haRef0WH.jpg", genre: "Action" },
+      { id: "27205", title: "Inception", poster: "https://image.tmdb.org/t/p/w300/qmDpIHrmpJINaRKAfWQfftjCdyi.jpg", genre: "Sci-Fi" },
+      { id: "497", title: "The Green Mile", poster: "https://image.tmdb.org/t/p/w300/o0lO84GI7qrG6XFvtsPOSV7CTNa.jpg", genre: "Drama" },
+      
+      // 🔥 Action
+      { id: "603", title: "The Matrix", poster: "https://image.tmdb.org/t/p/w300/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg", genre: "Action" },
+      { id: "122", title: "The Lord of the Rings: The Return of the King", poster: "https://image.tmdb.org/t/p/w300/rCzpDGLbOoPwLjy3OAm5NUPOTrC.jpg", genre: "Fantasy" },
+      { id: "1891", title: "The Empire Strikes Back", poster: "https://image.tmdb.org/t/p/w300/7BuH8itoSrLExs2YZSsM01Qk2no.jpg", genre: "Sci-Fi" },
+      { id: "272", title: "Batman Begins", poster: "https://image.tmdb.org/t/p/w300/1P3ZyEq02wcTMd3iE4ebtLvncvH.jpg", genre: "Action" },
+      
+      // 👻 Horror
+      { id: "4232", title: "The Strangers", poster: "https://image.tmdb.org/t/p/w300/dijvYZ0Ky5oQffoIeqkFVpGNYp7.jpg", genre: "Horror" },
+      { id: "694", title: "The Shining", poster: "https://image.tmdb.org/t/p/w300/9fgh3Ns1iRzlQNYuJyK0ARQZU7w.jpg", genre: "Horror" },
+      { id: "807", title: "Se7en", poster: "https://image.tmdb.org/t/p/w300/6yoghtyTpznpBik8EngEmJskVUO.jpg", genre: "Thriller" },
+      { id: "439079", title: "The Nun", poster: "https://image.tmdb.org/t/p/w300/sFC1ElvoKGdHJIWRpNB3xWJ9lJA.jpg", genre: "Horror" },
+      { id: "381288", title: "Split", poster: "https://image.tmdb.org/t/p/w300/bqb9WsmZmDIKxqYmBJ9lj7J6hzn.jpg", genre: "Thriller" }
+    ];
 
-    function filterMovies() {
-      const input = document.getElementById("searchInput").value.toLowerCase();
-      const movies = document.querySelectorAll(".movie");
-      movies.forEach(movie => {
-        const title = movie.innerText.toLowerCase();
-        movie.style.display = title.includes(input) ? "block" : "none";
+    // Render movies
+    function renderMovies(list) {
+      const movieList = document.getElementById("movieList");
+      movieList.innerHTML = "";
+      list.forEach(movie => {
+        const div = document.createElement("div");
+        div.classList.add("movie");
+        div.innerHTML = `
+          <img src="${movie.poster}" alt="${movie.title}">
+          <p>${movie.title}</p>
+        `;
+        div.onclick = () => playMovie(movie.id);
+        movieList.appendChild(div);
       });
     }
+
+    // Play movie
+    function playMovie(id) {
+      document.getElementById("player").src = `https://vidking.net/embed/movie/${id}`;
+      window.scrollTo({ top: document.getElementById("player-container").offsetTop, behavior: "smooth" });
+    }
+
+    // Filter search
+    function filterMovies() {
+      const input = document.getElementById("searchInput").value.toLowerCase();
+      const filtered = movies.filter(m => m.title.toLowerCase().includes(input));
+      renderMovies(filtered);
+    }
+
+    // Initial load
+    renderMovies(movies);
   </script>
 </body>
 </html>
