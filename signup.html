@@ -34,24 +34,24 @@
   </div>
 
   <footer><p>© 2025 Duck Data</p></footer>
-
+  <script>
+    const supabaseUrl = "https://scvojkdxdjjgyobegqrj.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjdm9qa2R4ZGpqZ3lvYmVncXJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjgyMzMsImV4cCI6MjA3NDI0NDIzM30.eVHVcXMe7V2REHOBYNPzDrzifsCFLAxwHc03bYV7BVs";
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+  </script>
   <script>
     document.getElementById("signupForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
-
-      const res = await fetch("/signup", {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({email, password})
-      });
-
-      if (res.ok) {
-        alert("Account created! Please log in.");
-        window.location.href = "login.html";
+  
+      const { data, error } = await supabase.auth.signUp({ email, password });
+  
+      if (error) {
+        alert(error.message);
       } else {
-        alert("Error creating account.");
+        alert("Account created! Check your email to confirm.");
+        window.location.href = "login.html";
       }
     });
   </script>
