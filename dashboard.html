@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Duck Data</title>
+  <style>
+    body {margin:0;font-family:Arial,Helvetica,sans-serif;background:#f9fafb;color:#111827;}
+    header {background:#2563eb;color:white;padding:1.5rem;text-align:center;}
+    .container {max-width:900px;margin:2rem auto;padding:1rem;}
+    .card {background:white;padding:1.5rem;margin-bottom:1.5rem;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+    label {font-weight:bold;}
+    input, textarea {width:100%;margin-top:0.5rem;margin-bottom:1rem;padding:0.7rem;border:1px solid #d1d5db;border-radius:8px;}
+    button {padding:0.7rem 1.5rem;background:#2563eb;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:bold;}
+    button:hover {background:#1e40af;}
+    canvas {margin-top:1rem;max-width:100%;}
+  </style>
+</head>
+<body>
+  <header><h1>Duck Data Dashboard</h1></header>
+  <div class="container">
+    <div class="card">
+      <h2>Create Dataset</h2>
+      <form id="datasetForm">
+        <label>Dataset Name</label>
+        <input type="text" id="datasetName" required>
+        <label>Data Points (comma separated)</label>
+        <textarea id="dataPoints" required></textarea>
+        <button type="submit">Save & Graph</button>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Graph</h2>
+      <canvas id="graph"></canvas>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const ctx = document.getElementById('graph').getContext('2d');
+    let chart;
+
+    document.getElementById("datasetForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("datasetName").value;
+      const points = document.getElementById("dataPoints").value.split(",").map(Number);
+
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: points.map((_, i) => i+1),
+          datasets: [{label: name, data: points, borderColor:"#2563eb", backgroundColor:"#93c5fd"}]
+        }
+      });
+    });
+  </script>
+</body>
+</html>
