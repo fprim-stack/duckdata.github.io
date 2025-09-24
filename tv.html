@@ -9,8 +9,10 @@
     header { background: #ffd700; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; color: #111; }
     .search-bar { text-align: center; margin: 20px; }
     input { width: 50%; padding: 10px; border-radius: 25px; border: none; }
-    .movies { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin: 20px; }
-    .movie { background: #111827; padding: 10px; border-radius: 10px; width: 150px; text-align: center; cursor: pointer; transition: transform 0.2s; }
+    .row { margin: 20px; }
+    .row h2 { margin-left: 10px; }
+    .movies { display: flex; gap: 15px; overflow-x: auto; padding: 10px; }
+    .movie { background: #111827; padding: 10px; border-radius: 10px; width: 150px; flex-shrink: 0; text-align: center; cursor: pointer; transition: transform 0.2s; }
     .movie:hover { transform: scale(1.05); }
     .movie img { width: 100%; border-radius: 8px; }
     #player-container { text-align: center; margin: 30px; }
@@ -24,7 +26,8 @@
     <input type="text" id="searchInput" placeholder="Search movies..." onkeyup="filterMovies()">
   </div>
 
-  <div class="movies" id="movieList"></div>
+  <div id="rows"></div>
+  <div class="movies" id="movieList" style="display:none;"></div>
 
   <div id="player-container">
     <h2>Now Playing</h2>
@@ -32,32 +35,123 @@
   </div>
 
   <script>
-    // Database of movies (Popular, Action, Horror)
-    const movies = [
-      // 🎬 Popular
-      { id: "603692", title: "John Wick: Chapter 4", poster: "https://image.tmdb.org/t/p/w300/vZloFAK7NmvMGKE7VkF5UHaz0I.jpg", genre: "Action" },
-      { id: "299534", title: "Avengers: Endgame", poster: "https://image.tmdb.org/t/p/w300/or06FN3Dka5tukK1e9sl16pB3iy.jpg", genre: "Action" },
-      { id: "155", title: "The Dark Knight", poster: "https://image.tmdb.org/t/p/w300/qJ2tW6WMUDux911r6m7haRef0WH.jpg", genre: "Action" },
-      { id: "27205", title: "Inception", poster: "https://image.tmdb.org/t/p/w300/qmDpIHrmpJINaRKAfWQfftjCdyi.jpg", genre: "Sci-Fi" },
-      { id: "497", title: "The Green Mile", poster: "https://image.tmdb.org/t/p/w300/o0lO84GI7qrG6XFvtsPOSV7CTNa.jpg", genre: "Drama" },
-      
-      // 🔥 Action
-      { id: "603", title: "The Matrix", poster: "https://image.tmdb.org/t/p/w300/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg", genre: "Action" },
-      { id: "122", title: "The Lord of the Rings: The Return of the King", poster: "https://image.tmdb.org/t/p/w300/rCzpDGLbOoPwLjy3OAm5NUPOTrC.jpg", genre: "Fantasy" },
-      { id: "1891", title: "The Empire Strikes Back", poster: "https://image.tmdb.org/t/p/w300/7BuH8itoSrLExs2YZSsM01Qk2no.jpg", genre: "Sci-Fi" },
-      { id: "272", title: "Batman Begins", poster: "https://image.tmdb.org/t/p/w300/1P3ZyEq02wcTMd3iE4ebtLvncvH.jpg", genre: "Action" },
-      
-      // 👻 Horror
-      { id: "4232", title: "The Strangers", poster: "https://image.tmdb.org/t/p/w300/dijvYZ0Ky5oQffoIeqkFVpGNYp7.jpg", genre: "Horror" },
-      { id: "694", title: "The Shining", poster: "https://image.tmdb.org/t/p/w300/9fgh3Ns1iRzlQNYuJyK0ARQZU7w.jpg", genre: "Horror" },
-      { id: "807", title: "Se7en", poster: "https://image.tmdb.org/t/p/w300/6yoghtyTpznpBik8EngEmJskVUO.jpg", genre: "Thriller" },
-      { id: "439079", title: "The Nun", poster: "https://image.tmdb.org/t/p/w300/sFC1ElvoKGdHJIWRpNB3xWJ9lJA.jpg", genre: "Horror" },
-      { id: "381288", title: "Split", poster: "https://image.tmdb.org/t/p/w300/bqb9WsmZmDIKxqYmBJ9lj7J6hzn.jpg", genre: "Thriller" }
-    ];
+    // Database of movies
+  const movies = [
+    // 🎬 POPULAR
+    { id: "299534", title: "Avengers: Endgame", poster: "https://image.tmdb.org/t/p/w300/or06FN3Dka5tukK1e9sl16pB3iy.jpg", genre: "Action" },
+    { id: "299536", title: "Avengers: Infinity War", poster: "https://image.tmdb.org/t/p/w300/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg", genre: "Action" },
+    { id: "155", title: "The Dark Knight", poster: "https://image.tmdb.org/t/p/w300/qJ2tW6WMUDux911r6m7haRef0WH.jpg", genre: "Action" },
+    { id: "27205", title: "Inception", poster: "https://image.tmdb.org/t/p/w300/qmDpIHrmpJINaRKAfWQfftjCdyi.jpg", genre: "Sci-Fi" },
+    { id: "603692", title: "John Wick: Chapter 4", poster: "https://image.tmdb.org/t/p/w300/vZloFAK7NmvMGKE7VkF5UHaz0I.jpg", genre: "Action" },
+    { id: "497", title: "The Green Mile", poster: "https://image.tmdb.org/t/p/w300/o0lO84GI7qrG6XFvtsPOSV7CTNa.jpg", genre: "Drama" },
+    { id: "278", title: "The Shawshank Redemption", poster: "https://image.tmdb.org/t/p/w300/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg", genre: "Drama" },
+    { id: "550", title: "Fight Club", poster: "https://image.tmdb.org/t/p/w300/bptfVGEQuv6vDTIMVCHjJ9Dz8PX.jpg", genre: "Drama" },
+    { id: "13", title: "Forrest Gump", poster: "https://image.tmdb.org/t/p/w300/saHP97rTPS5eLmrLQEcANmKrsFl.jpg", genre: "Drama" },
+    { id: "424", title: "Schindler's List", poster: "https://image.tmdb.org/t/p/w300/c8Ass7acuOe4za6DhSattE359gr.jpg", genre: "Drama" },
+  
+    // 🔥 ACTION
+    { id: "603", title: "The Matrix", poster: "https://image.tmdb.org/t/p/w300/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg", genre: "Action" },
+    { id: "604", title: "The Matrix Reloaded", poster: "https://image.tmdb.org/t/p/w300/9TGHDvWrqKBzwDxDodHYXEmOE6J.jpg", genre: "Action" },
+    { id: "605", title: "The Matrix Revolutions", poster: "https://image.tmdb.org/t/p/w300/fgm8OZ7o4G1G1I9EeGcb85Noe6L.jpg", genre: "Action" },
+    { id: "324857", title: "Spider-Man: Into the Spider-Verse", poster: "https://image.tmdb.org/t/p/w300/iiZZdoQBEYBv6id8su7ImL0oCbD.jpg", genre: "Animation" },
+    { id: "634649", title: "Spider-Man: No Way Home", poster: "https://image.tmdb.org/t/p/w300/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg", genre: "Action" },
+    { id: "299537", title: "Captain Marvel", poster: "https://image.tmdb.org/t/p/w300/AtsgWhDnHTq68L0lLsUrCnM7TjG.jpg", genre: "Action" },
+    { id: "299581", title: "Captain America: Civil War", poster: "https://image.tmdb.org/t/p/w300/rAGiXaUfPzY7CDEyNKUofk3Kw2e.jpg", genre: "Action" },
+    { id: "99861", title: "Avengers: Age of Ultron", poster: "https://image.tmdb.org/t/p/w300/4ssDuvEDkSArWEdyBl2X5EHvYKU.jpg", genre: "Action" },
+    { id: "68721", title: "Iron Man 3", poster: "https://image.tmdb.org/t/p/w300/qhPtAc1TKbMPqNvcdXSOn9Bn7hZ.jpg", genre: "Action" },
+    { id: "1726", title: "Iron Man", poster: "https://image.tmdb.org/t/p/w300/78lPtwv72eTNqFW9COBYI0dWDJa.jpg", genre: "Action" },
+  
+    // 👻 HORROR
+    { id: "4232", title: "The Strangers", poster: "https://image.tmdb.org/t/p/w300/dijvYZ0Ky5oQffoIeqkFVpGNYp7.jpg", genre: "Horror" },
+    { id: "694", title: "The Shining", poster: "https://image.tmdb.org/t/p/w300/9fgh3Ns1iRzlQNYuJyK0ARQZU7w.jpg", genre: "Horror" },
+    { id: "439079", title: "The Nun", poster: "https://image.tmdb.org/t/p/w300/sFC1ElvoKGdHJIWRpNB3xWJ9lJA.jpg", genre: "Horror" },
+    { id: "381288", title: "Split", poster: "https://image.tmdb.org/t/p/w300/bqb9WsmZmDIKxqYmBJ9lj7J6hzn.jpg", genre: "Thriller" },
+    { id: "11324", title: "Shutter Island", poster: "https://image.tmdb.org/t/p/w300/4GDy0PHYX3VRXUtwK5ysFbg3kEx.jpg", genre: "Thriller" },
+    { id: "348", title: "Alien", poster: "https://image.tmdb.org/t/p/w300/vfrQk5IPloGg1v9Rzbh2Eg3VGyM.jpg", genre: "Horror" },
+    { id: "807", title: "Se7en", poster: "https://image.tmdb.org/t/p/w300/6yoghtyTpznpBik8EngEmJskVUO.jpg", genre: "Thriller" },
+    { id: "38142", title: "Paranormal Activity", poster: "https://image.tmdb.org/t/p/w300/vV6mwEvKk1EhR1p9jwC5a3bYH2y.jpg", genre: "Horror" },
+    { id: "419430", title: "Get Out", poster: "https://image.tmdb.org/t/p/w300/tFXcEccSQMf3lfhfXKSU9iRBpa3.jpg", genre: "Horror" },
+    { id: "424139", title: "Halloween", poster: "https://image.tmdb.org/t/p/w300/bXs0zkv2iGVViZEy78teg2ycDBm.jpg", genre: "Horror" },
+  
+    // 🤖 SCI-FI
+    { id: "157336", title: "Interstellar", poster: "https://image.tmdb.org/t/p/w300/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg", genre: "Sci-Fi" },
+    { id: "11", title: "Star Wars", poster: "https://image.tmdb.org/t/p/w300/6FfCtAuVAW8XJjZ7eWeLibRLWTw.jpg", genre: "Sci-Fi" },
+    { id: "140607", title: "Star Wars: The Force Awakens", poster: "https://image.tmdb.org/t/p/w300/weUSwMdQIa3NaXVzwUoIIcAi85d.jpg", genre: "Sci-Fi" },
+    { id: "181808", title: "Star Wars: The Last Jedi", poster: "https://image.tmdb.org/t/p/w300/kOVEVeg59E0wsnXmF9nrh6OmWII.jpg", genre: "Sci-Fi" },
+    { id: "181812", title: "Star Wars: The Rise of Skywalker", poster: "https://image.tmdb.org/t/p/w300/db32LaOibwEliAmSL2jjDF6oDdj.jpg", genre: "Sci-Fi" },
+    { id: "118340", title: "Guardians of the Galaxy", poster: "https://image.tmdb.org/t/p/w300/r7vmZjiyZw9rpJMQJdXpjgiCOk9.jpg", genre: "Action" },
+    { id: "283995", title: "Guardians of the Galaxy Vol. 2", poster: "https://image.tmdb.org/t/p/w300/y4MBh0EjBlMuOzv9axM4qJlmhzz.jpg", genre: "Action" },
+    { id: "497698", title: "Black Widow", poster: "https://image.tmdb.org/t/p/w300/qAZ0pzat24kLdO3o8ejmbLxyOac.jpg", genre: "Action" },
+    { id: "315635", title: "Spider-Man: Homecoming", poster: "https://image.tmdb.org/t/p/w300/c24sv2weTHPsmDa7jEMN0m2P3RT.jpg", genre: "Action" },
+    { id: "324857", title: "Spider-Man: Into the Spider-Verse", poster: "https://image.tmdb.org/t/p/w300/iiZZdoQBEYBv6id8su7ImL0oCbD.jpg", genre: "Animation" },
+    { id: "680", title: "Pulp Fiction", poster: "https://image.tmdb.org/t/p/w300/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg", genre: "Crime" },
+    { id: "13", title: "Forrest Gump", poster: "https://image.tmdb.org/t/p/w300/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg", genre: "Drama" },
+    { id: "1124", title: "The Prestige", poster: "https://image.tmdb.org/t/p/w300/5MXyQfz8xUP3dIFPTubhTsbFY6N.jpg", genre: "Mystery" },
+    { id: "324857", title: "Spider-Man: Into the Spider-Verse", poster: "https://image.tmdb.org/t/p/w300/iiZZdoQBEYBv6id8su7ImL0oCbD.jpg", genre: "Animation" },
+    { id: "330459", title: "Rogue One: A Star Wars Story", poster: "https://image.tmdb.org/t/p/w300/6t8ES1d12OzWyCGxBeDYLHoaDrT.jpg", genre: "Sci-Fi" },
+    { id: "27205", title: "Inception", poster: "https://image.tmdb.org/t/p/w300/qmDpIHrmpJINaRKAfWQfftjCdyi.jpg", genre: "Sci-Fi" },
+    { id: "597", title: "Titanic", poster: "https://image.tmdb.org/t/p/w300/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg", genre: "Romance" },
+    { id: "207703", title: "Kingsman: The Secret Service", poster: "https://image.tmdb.org/t/p/w300/ay7xwXn1G9fzX9TUBlkGA584rSc.jpg", genre: "Action" },
+    { id: "10138", title: "Iron Man 2", poster: "https://image.tmdb.org/t/p/w300/6WBeq4fCfn7AN0o21W9qNcRF2l9.jpg", genre: "Action" },
+    { id: "672", title: "Harry Potter and the Chamber of Secrets", poster: "https://image.tmdb.org/t/p/w300/sdEOH0992YZ0QSxgXNIGLq1ToUi.jpg", genre: "Fantasy" },
+    { id: "120467", title: "The Grand Budapest Hotel", poster: "https://image.tmdb.org/t/p/w300/nX5XotM9yprCKarRH4fzOq1VM1J.jpg", genre: "Comedy" },
+    { id: "615656", title: "Meg 2: The Trench", poster: "https://image.tmdb.org/t/p/w300/4m1Au3YkjqsxF8iwQy0fPYSxE0h.jpg", genre: "Action" },
+    { id: "345911", title: "Pacific Rim: Uprising", poster: "https://image.tmdb.org/t/p/w300/v5HlmJK9bdeHxN2QhaFP1ivjX3U.jpg", genre: "Sci-Fi" },
+    { id: "49521", title: "Man of Steel", poster: "https://image.tmdb.org/t/p/w300/xWlaTLnD8NJMTT9PGOD9z5re1SL.jpg", genre: "Action" },
+    { id: "98566", title: "Teenage Mutant Ninja Turtles", poster: "https://image.tmdb.org/t/p/w300/oDL2ryJ0sV2bmjgshVgJb3qzvWP.jpg", genre: "Action" },
+    { id: "32657", title: "The Expendables", poster: "https://image.tmdb.org/t/p/w300/jtwS7B6gYfGpyc4lZG7Y5yRbXJz.jpg", genre: "Action" },
+    { id: "9480", title: "Fear and Loathing in Las Vegas", poster: "https://image.tmdb.org/t/p/w300/4BPzYkqUQcTxx7Zx8okYLkS5zN.jpg", genre: "Comedy" },
+    { id: "111", title: "Scarface", poster: "https://image.tmdb.org/t/p/w300/iQ5ztdjvteGeboxtmRdXEChJOHh.jpg", genre: "Crime" },
+    { id: "597208", title: "Nightmare Alley", poster: "https://image.tmdb.org/t/p/w300/680klE0dIreQQOyWKFgG4gBvRLQ.jpg", genre: "Thriller" },
+    { id: "862", title: "Toy Story", poster: "https://image.tmdb.org/t/p/w300/uXDfjJbdP4ijW5hWSBrPrlKpxab.jpg", genre: "Animation" },
+    { id: "140607", title: "Star Wars: The Force Awakens", poster: "https://image.tmdb.org/t/p/w300/wqnLdwVXoBjKibFRR5U3y0aDUhs.jpg", genre: "Sci-Fi" },
+    { id: "585", title: "Monsters, Inc.", poster: "https://image.tmdb.org/t/p/w300/sgheSKxZkttIe8ONsf2s9WfRxga.jpg", genre: "Animation" },
+    { id: "497698", title: "Black Widow", poster: "https://image.tmdb.org/t/p/w300/qAZ0pzat24kLdO3o8ejmbLxyOac.jpg", genre: "Action" },
+    { id: "335787", title: "Uncharted", poster: "https://image.tmdb.org/t/p/w300/rJHC1RUORuUhtfNb4Npclx0xnOf.jpg", genre: "Action" },
+    { id: "420817", title: "Aladdin", poster: "https://image.tmdb.org/t/p/w300/3iYQTLGoy7QnjcUYRJy4YrAgGvp.jpg", genre: "Fantasy" },
+    { id: "324552", title: "John Wick: Chapter 2", poster: "https://image.tmdb.org/t/p/w300/kL99FVq572hNPfMyfQO2dV7HoTB.jpg", genre: "Action" },
+    { id: "282035", title: "The Lego Batman Movie", poster: "https://image.tmdb.org/t/p/w300/snGwr2gag4Fcgx2OGmH9otl6ofW.jpg", genre: "Animation" },
+    { id: "361743", title: "Top Gun: Maverick", poster: "https://image.tmdb.org/t/p/w300/62HCnUTziyWcpDaBO2i1DX17ljH.jpg", genre: "Action" },
+    { id: "399566", title: "Godzilla vs. Kong", poster: "https://image.tmdb.org/t/p/w300/pgqgaUx1cJb5oZQQ5v0tNARCeBp.jpg", genre: "Action" },
+    { id: "284052", title: "Doctor Strange", poster: "https://image.tmdb.org/t/p/w300/uGBVj3bEbCoZbDjjl9wTxcygko1.jpg", genre: "Fantasy" }, 
+    { id: "607", title: "Men in Black", poster: "https://image.tmdb.org/t/p/w300/uLOmOF5IzWoyrgIF5MfUnh5pa1X.jpg", genre: "Comedy" },
+    { id: "56292", title: "Mission: Impossible - Ghost Protocol", poster: "https://image.tmdb.org/t/p/w300/mfMWFha3sMqj17qGaLF3MK22Vum.jpg", genre: "Action" },
+    { id: "399404", title: "The Dark Tower", poster: "https://image.tmdb.org/t/p/w300/i9GUSgddIqrroubiLsvvMRYyRy0.jpg", genre: "Fantasy" },
+    { id: "671", title: "Harry Potter and the Philosopher's Stone", poster: "https://image.tmdb.org/t/p/w300/wuMc08IPKEatf9rnMNXvIDxqP4W.jpg", genre: "Fantasy" }
+  ];
 
-    // Render movies
+
+    // Build rows by genre
+    function renderRows() {
+      const genres = [...new Set(movies.map(m => m.genre))];
+      const rowsDiv = document.getElementById("rows");
+      rowsDiv.innerHTML = "";
+
+      genres.forEach(genre => {
+        const row = document.createElement("div");
+        row.classList.add("row");
+        row.innerHTML = `<h2>${genre}</h2><div class="movies"></div>`;
+
+        const container = row.querySelector(".movies");
+        movies.filter(m => m.genre === genre).forEach(movie => {
+          const div = document.createElement("div");
+          div.classList.add("movie");
+          div.innerHTML = `
+            <img src="${movie.poster}" alt="${movie.title}">
+            <p>${movie.title}</p>
+          `;
+          div.onclick = () => playMovie(movie.id);
+          container.appendChild(div);
+        });
+
+        rowsDiv.appendChild(row);
+      });
+    }
+
+    // Render search results
     function renderMovies(list) {
       const movieList = document.getElementById("movieList");
+      movieList.style.display = "flex";
       movieList.innerHTML = "";
       list.forEach(movie => {
         const div = document.createElement("div");
@@ -73,19 +167,24 @@
 
     // Play movie
     function playMovie(id) {
-      document.getElementById("player").src = `https://vidking.net/embed/movie/${id}`;
+      document.getElementById("player").src = `https://vidking.net/embed/movie/${id}?autoPlay=true`;
       window.scrollTo({ top: document.getElementById("player-container").offsetTop, behavior: "smooth" });
     }
 
     // Filter search
     function filterMovies() {
       const input = document.getElementById("searchInput").value.toLowerCase();
+      if (input.trim() === "") {
+        document.getElementById("movieList").style.display = "none";
+        renderRows();
+        return;
+      }
       const filtered = movies.filter(m => m.title.toLowerCase().includes(input));
       renderMovies(filtered);
     }
 
     // Initial load
-    renderMovies(movies);
+    renderRows();
   </script>
 </body>
 </html>
