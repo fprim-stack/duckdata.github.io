@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up - Duck Data</title>
+  <style>
+    body {margin:0;font-family:Arial,Helvetica,sans-serif;background:#f9fafb;color:#111827;display:flex;flex-direction:column;min-height:100vh;}
+    header {background:#2563eb;color:white;padding:1.5rem;text-align:center;}
+    .container {flex:1;display:flex;align-items:center;justify-content:center;padding:2rem;}
+    .signup-box {background:white;padding:2rem;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);width:100%;max-width:400px;}
+    .signup-box h2 {text-align:center;margin-bottom:1.5rem;}
+    .signup-box label {display:block;margin-top:1rem;font-weight:bold;}
+    .signup-box input {width:100%;padding:0.7rem;margin-top:0.5rem;border:1px solid #d1d5db;border-radius:8px;font-size:1rem;}
+    .btn {display:block;width:100%;margin-top:1.5rem;padding:0.8rem;background:#2563eb;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;transition:background 0.2s;}
+    .btn:hover {background:#1e40af;}
+    footer {background:#1e293b;color:#cbd5e1;text-align:center;padding:1rem;}
+  </style>
+</head>
+<body>
+  <header><h1>Duck Data</h1></header>
+
+  <div class="container">
+    <div class="signup-box">
+      <h2>Create Account</h2>
+      <form id="signupForm">
+        <label>Email</label>
+        <input type="email" id="email" required>
+        <label>Password</label>
+        <input type="password" id="password" required>
+        <button type="submit" class="btn">Sign Up</button>
+      </form>
+    </div>
+  </div>
+
+  <footer><p>© 2025 Duck Data</p></footer>
+
+  <script>
+    document.getElementById("signupForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      const res = await fetch("/signup", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({email, password})
+      });
+
+      if (res.ok) {
+        alert("Account created! Please log in.");
+        window.location.href = "login.html";
+      } else {
+        alert("Error creating account.");
+      }
+    });
+  </script>
+</body>
+</html>
