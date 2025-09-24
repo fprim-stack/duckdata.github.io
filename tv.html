@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Duck TV</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #0d1b2a; /* dark navy */
+      color: #fff;
+    }
+
+    header {
+      background: #f5d300; /* duck yellow */
+      color: #0d1b2a;
+      padding: 15px;
+      font-size: 1.8rem;
+      font-weight: bold;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    #searchBar {
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      gap: 10px;
+    }
+
+    #searchInput {
+      width: 60%;
+      max-width: 500px;
+      padding: 12px 15px;
+      border-radius: 25px;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+    }
+
+    button {
+      background: #f5d300;
+      border: none;
+      border-radius: 25px;
+      padding: 12px 20px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      color: #0d1b2a;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #ffd633;
+    }
+
+    #results {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 20px;
+      padding: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .movie {
+      background: #1b263b;
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+
+    .movie:hover {
+      transform: scale(1.05);
+    }
+
+    .movie img {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .movie h3 {
+      font-size: 0.95rem;
+      margin: 0 0 8px 0;
+      height: 2.6em;
+      overflow: hidden;
+    }
+
+    #playerSection {
+      margin: 30px auto;
+      text-align: center;
+    }
+
+    iframe {
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+  </style>
+</head>
+<body>
+  <header>🐥 Duck TV</header>
+
+  <div id="searchBar">
+    <input type="text" id="searchInput" placeholder="Search movies...">
+    <button onclick="searchMovies()">Search</button>
+  </div>
+
+  <div id="results"></div>
+
+  <div id="playerSection">
+    <h2>Now Playing</h2>
+    <iframe id="player" width="800" height="450" src="" frameborder="0" allowfullscreen></iframe>
+  </div>
+
+  <script>
+    const apiKey = "YOUR_TMDB_API_KEY"; // get from https://www.themoviedb.org/settings/api
+
+    async function searchMovies() {
+      const query = document.getElementById("searchInput").value;
+      if (!query) return;
+
+      const url = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(query)}`;
+      const res = await fetch(url);
+      const data = await res.json();
+
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "";
+
+      data.results.forEach(movie => {
+        const div = document.createElement("div");
+        div.classList.add("movie");
+        div.innerHTML = `
+          <img src="https://image.tmdb.org/t/p/w300${movie.poster_path}" alt="${movie.title}">
+          <h3>${movie.title}</h3>
+          <button onclick="playMovie(${movie.id})">▶ Play</button>
+        `;
+        resultsDiv.appendChild(div);
+      });
+    }
+
+    function playMovie(tmdbId) {
+      document.getElementById("player").src = `https://vidking.net/embed/movie/${tmdbId}`;
+      window.scrollTo({ top: document.getElementById("playerSection").offsetTop, behavior: "smooth" });
+    }
+  </script>
+</body>
+</html>
