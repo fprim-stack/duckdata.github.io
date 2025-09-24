@@ -14,49 +14,73 @@
       flex-direction: column;
       min-height: 100vh;
     }
+
     header {
       background: #2563eb;
       color: white;
-      padding: 1.5rem;
-      text-align: center;
+      padding: 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
+
     header h1 {
       margin: 0;
       font-size: 2rem;
     }
+
     header button {
       background: #1e40af;
       color: white;
       border: none;
       padding: 0.5rem 1rem;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       font-weight: bold;
+      transition: background 0.2s ease;
     }
+
+    header button:hover {
+      background: #1a369f;
+    }
+
     main {
       flex: 1;
       padding: 2rem;
+      display: flex;
+      justify-content: center;
     }
-    iframe {
+
+    .dashboard-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
       width: 100%;
+      max-width: 1200px;
       height: 80vh;
+      overflow: hidden;
+      padding: 1rem;
+    }
+
+    .dashboard-card iframe {
+      width: 100%;
+      height: 100%;
       border: none;
       border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
+
     footer {
       background: #1e293b;
       color: #cbd5e1;
       text-align: center;
-      padding: 1rem;
+      padding: 1.5rem;
     }
+
     footer a {
       color: #93c5fd;
       text-decoration: none;
     }
+
     footer a:hover {
       text-decoration: underline;
     }
@@ -69,8 +93,10 @@
   </header>
 
   <main>
-    <!-- Embed your NocoDB dashboard here -->
-    <iframe src="https://app.nocodb.com/#/base/ac3e2157-08d0-4420-88cf-1087a047817b"></iframe>
+    <div class="dashboard-card">
+      <!-- Replace with your public NocoDB dashboard URL -->
+      <iframe src="https://app.nocodb.com/#/base/ac3e2157-08d0-4420-88cf-1087a047817b"></iframe>
+    </div>
   </main>
 
   <footer>
@@ -79,7 +105,7 @@
 
   <script>
     function logout() {
-      // Redirect to login page (replace with your login.html if needed)
+      // Redirect to login page
       window.location.href = 'login.html';
     }
   </script>
