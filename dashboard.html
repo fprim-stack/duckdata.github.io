@@ -34,6 +34,43 @@
       <canvas id="graph"></canvas>
     </div>
   </div>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    const supabaseUrl = "https://YOUR-PROJECT-URL.supabase.co";
+    const supabaseKey = "YOUR-ANON-KEY";
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+  
+    async function getUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = "login.html";
+      }
+      return user;
+    }
+  
+    const ctx = document.getElementById('graph').getContext('2d');
+    let chart;
+  
+    document.getElementById("datasetForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const user = await getUser();
+      const name = document.getElementById("datasetName").value;
+      const points = document.getElementById("dataPoints").value.split(",").map(Number);
+  
+      // save to Supabase
+      await supabase.from("datasets").insert([{ user_id: user.id, name, points: JSON.stringify(points) }]);
+  
+      // draw chart
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: points.map((_, i) => i + 1),
+          datasets: [{ label: name, data: points, borderColor:"#2563eb", backgroundColor:"#93c5fd"}]
+        }
+      });
+    });
+  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
