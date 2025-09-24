@@ -40,25 +40,27 @@
   </div>
 
   <footer><p>© 2025 Duck Data</p></footer>
-
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    const supabaseUrl = "https://scvojkdxdjjgyobegqrj.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjdm9qa2R4ZGpqZ3lvYmVncXJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjgyMzMsImV4cCI6MjA3NDI0NDIzM30.eVHVcXMe7V2REHOBYNPzDrzifsCFLAxwHc03bYV7BVs";
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+  </script>
   <script>
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
-
-      const res = await fetch("/login", {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({email, password})
-      });
-
-      if (res.ok) {
-        window.location.href = "dashboard.html";
+  
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  
+      if (error) {
+        alert(error.message);
       } else {
-        alert("Invalid login");
+        window.location.href = "dashboard.html";
       }
     });
   </script>
 </body>
 </html>
+
