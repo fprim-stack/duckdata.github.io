@@ -1,51 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sign Up - Duck Data</title>
-  <script src="https://unpkg.com/@supabase/supabase-js"></script>
   <style>
-    body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f9fafb; }
-    .box { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); width: 300px; }
-    input, button { width: 100%; padding: 0.7rem; margin-top: 0.5rem; border: 1px solid #d1d5db; border-radius: 8px; }
-    button { background:#2563eb; color:white; border:none; font-weight:bold; cursor:pointer; }
-    button:hover { background:#1e40af; }
-    #message { margin-top: 1rem; text-align:center; font-size: 0.9rem; }
+    body {margin:0;font-family:Arial,Helvetica,sans-serif;background:#f9fafb;color:#111827;display:flex;flex-direction:column;min-height:100vh;}
+    header {background:#2563eb;color:white;padding:1.5rem;text-align:center;}
+    .container {flex:1;display:flex;align-items:center;justify-content:center;padding:2rem;}
+    .login-box {background:white;padding:2rem;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);width:100%;max-width:400px;}
+    .login-box h2 {text-align:center;margin-bottom:1.5rem;}
+    .login-box label {display:block;margin-top:1rem;font-weight:bold;}
+    .login-box input {width:100%;padding:0.7rem;margin-top:0.5rem;border:1px solid #d1d5db;border-radius:8px;font-size:1rem;}
+    .btn {display:block;width:100%;margin-top:1.5rem;padding:0.8rem;background:#2563eb;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;transition:background 0.2s;}
+    .btn:hover {background:#1e40af;}
+    .extra {text-align:center;margin-top:1rem;}
+    footer {background:#1e293b;color:#cbd5e1;text-align:center;padding:1rem;}
+    footer a {color:#93c5fd;text-decoration:none;}
+    footer a:hover {text-decoration:underline;}
+    #message {margin-top:1rem;text-align:center;font-size:0.9rem;}
   </style>
 </head>
 <body>
-  <div class="box">
-    <h2>Sign Up</h2>
-    <form id="signup-form">
-      <input type="email" id="email" placeholder="you@example.com" required>
-      <input type="password" id="password" placeholder="••••••••" required>
-      <button type="submit">Finish</button>
-    </form>
-    <div id="message"></div>
+  <header><h1>Duck Data</h1></header>
+
+  <div class="container">
+    <div class="login-box">
+      <h2>Sign Up</h2>
+      <form id="signupForm">
+        <label>Email</label>
+        <input type="email" id="email" required>
+        <label>Password</label>
+        <input type="password" id="password" required>
+        <button type="submit" class="btn">Finish</button>
+      </form>
+      <div id="message"></div>
+      <div class="extra">
+        <p>Already have an account? <a href="login.html">Log In</a></p>
+      </div>
+    </div>
   </div>
 
+  <footer><p>© 2025 Duck Data</p></footer>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script>
-    // Your Supabase project URL and anon key
     const supabaseUrl = "https://scvojkdxdjjgyobegqrj.supabase.co";
     const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjdm9qa2R4ZGpqZ3lvYmVncXJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjgyMzMsImV4cCI6MjA3NDI0NDIzM30.eVHVcXMe7V2REHOBYNPzDrzifsCFLAxwHc03bYV7BVs";
-
     const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-    document.getElementById("signup-form").addEventListener("submit", async (e) => {
+    document.getElementById("signupForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
 
-      let { data, error } = await supabaseClient.auth.signUp({ email, password });
-
+      const { error } = await supabaseClient.auth.signUp({ email, password });
       const messageBox = document.getElementById("message");
+
       if (error) {
         messageBox.textContent = "❌ " + error.message;
         messageBox.style.color = "red";
       } else {
-        messageBox.textContent = "✅ Account created! Check your email to confirm.";
+        messageBox.textContent = "✅ Account created! Redirecting to login...";
         messageBox.style.color = "green";
+        setTimeout(() => {
+          window.location.href = "login.html";
+        }, 1500); // wait 1.5s then redirect
       }
     });
   </script>
