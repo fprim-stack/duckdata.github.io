@@ -6,90 +6,168 @@
   <title>Dashboard - Duck Data</title>
   <style>
     body {margin:0;font-family:Arial,Helvetica,sans-serif;background:#f9fafb;color:#111827;}
-    header {background:#2563eb;color:white;padding:1.5rem;text-align:center;}
-    .container {max-width:900px;margin:2rem auto;padding:1rem;}
-    .card {background:white;padding:1.5rem;margin-bottom:1.5rem;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
-    label {font-weight:bold;}
-    input, textarea {width:100%;margin-top:0.5rem;margin-bottom:1rem;padding:0.7rem;border:1px solid #d1d5db;border-radius:8px;}
-    button {padding:0.7rem 1.5rem;background:#2563eb;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:bold;}
+    header {background:#2563eb;color:white;padding:1rem;text-align:center;display:flex;justify-content:space-between;align-items:center;}
+    header h1 {margin:0;}
+    header button {background:#1e40af;color:white;border:none;padding:0.5rem 1rem;border-radius:6px;cursor:pointer;}
+    .container {padding:2rem;}
+    .dataset-form, .entry-form {margin-bottom:2rem;background:white;padding:1rem;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.1);}
+    label {display:block;margin-top:1rem;font-weight:bold;}
+    input, select {width:100%;padding:0.6rem;margin-top:0.3rem;border:1px solid #d1d5db;border-radius:6px;}
+    button {margin-top:1rem;background:#2563eb;color:white;border:none;padding:0.7rem 1.2rem;border-radius:6px;cursor:pointer;}
     button:hover {background:#1e40af;}
-    canvas {margin-top:1rem;max-width:100%;}
+    canvas {max-width:100%;margin-top:2rem;}
   </style>
 </head>
 <body>
-  <header><h1>Duck Data Dashboard</h1></header>
+  <header>
+    <h1>Duck Data Dashboard</h1>
+    <button id="logoutBtn">Logout</button>
+  </header>
+
   <div class="container">
-    <div class="card">
-      <h2>Create Dataset</h2>
+    <!-- Create Dataset -->
+    <div class="dataset-form">
+      <h2>Create New Dataset</h2>
       <form id="datasetForm">
-        <label>Dataset Name</label>
+        <label for="datasetName">Dataset Name</label>
         <input type="text" id="datasetName" required>
-        <label>Data Points (comma separated)</label>
-        <textarea id="dataPoints" required></textarea>
-        <button type="submit">Save & Graph</button>
+        <button type="submit">Create Dataset</button>
       </form>
     </div>
-    <div class="card">
-      <h2>Graph</h2>
-      <canvas id="graph"></canvas>
-    </div>
-  </div>
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script>
-    const supabaseUrl = "https://YOUR-PROJECT-URL.supabase.co";
-    const supabaseKey = "YOUR-ANON-KEY";
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-  
-    async function getUser() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        window.location.href = "login.html";
-      }
-      return user;
-    }
-  
-    const ctx = document.getElementById('graph').getContext('2d');
-    let chart;
-  
-    document.getElementById("datasetForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const user = await getUser();
-      const name = document.getElementById("datasetName").value;
-      const points = document.getElementById("dataPoints").value.split(",").map(Number);
-  
-      // save to Supabase
-      await supabase.from("datasets").insert([{ user_id: user.id, name, points: JSON.stringify(points) }]);
-  
-      // draw chart
-      if (chart) chart.destroy();
-      chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: points.map((_, i) => i + 1),
-          datasets: [{ label: name, data: points, borderColor:"#2563eb", backgroundColor:"#93c5fd"}]
-        }
-      });
-    });
-  </script>
 
+    <!-- Add Data Entry -->
+    <div class="entry-form">
+      <h2>Add Data Entry</h2>
+      <form id="entryForm">
+        <label for="datasetSelect">Select Dataset</label>
+        <select id="datasetSelect" required></select>
+        <label for="dataValue">Value</label>
+        <input type="number" id="dataValue" step="any" required>
+        <button type="submit">Add Entry</button>
+      </form>
+    </div>
+
+    <!-- Chart -->
+    <h2>Dataset Chart</h2>
+    <canvas id="datasetChart"></canvas>
+  </div>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    const ctx = document.getElementById('graph').getContext('2d');
-    let chart;
+    const supabaseUrl = "https://scvojkdxdjjgyobegqrj.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjdm9qa2R4ZGpqZ3lvYmVncXJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjgyMzMsImV4cCI6MjA3NDI0NDIzM30.eVHVcXMe7V2REHOBYNPzDrzifsCFLAxwHc03bYV7BVs";
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    document.getElementById("datasetForm").addEventListener("submit", (e) => {
+    let currentUser = null;
+    let chart = null;
+
+    // --- AUTH CHECK ---
+    document.addEventListener("DOMContentLoaded", async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        window.location.href = "login.html";
+        return;
+      }
+      currentUser = session.user;
+
+      loadDatasets();
+    });
+
+    // --- LOGOUT ---
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await supabase.auth.signOut();
+      window.location.href = "login.html";
+    });
+
+    // --- CREATE DATASET ---
+    document.getElementById("datasetForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const name = document.getElementById("datasetName").value;
-      const points = document.getElementById("dataPoints").value.split(",").map(Number);
+
+      const { error } = await supabase.from("datasets").insert([{ name, user_id: currentUser.id }]);
+      if (error) {
+        alert("Error creating dataset: " + error.message);
+      } else {
+        document.getElementById("datasetForm").reset();
+        loadDatasets();
+      }
+    });
+
+    // --- LOAD DATASETS ---
+    async function loadDatasets() {
+      const { data, error } = await supabase.from("datasets").select("*").eq("user_id", currentUser.id);
+      if (error) {
+        alert("Error loading datasets: " + error.message);
+        return;
+      }
+
+      const select = document.getElementById("datasetSelect");
+      select.innerHTML = "";
+      data.forEach(d => {
+        const option = document.createElement("option");
+        option.value = d.id;
+        option.textContent = d.name;
+        select.appendChild(option);
+      });
+
+      if (data.length > 0) {
+        loadChart(data[0].id);
+      }
+    }
+
+    // --- ADD ENTRY ---
+    document.getElementById("entryForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const datasetId = document.getElementById("datasetSelect").value;
+      const value = parseFloat(document.getElementById("dataValue").value);
+
+      const { error } = await supabase.from("data_entries").insert([{ dataset_id: datasetId, value }]);
+      if (error) {
+        alert("Error adding entry: " + error.message);
+      } else {
+        document.getElementById("entryForm").reset();
+        loadChart(datasetId);
+      }
+    });
+
+    // --- LOAD CHART ---
+    async function loadChart(datasetId) {
+      const { data, error } = await supabase
+        .from("data_entries")
+        .select("*")
+        .eq("dataset_id", datasetId)
+        .order("recorded_at", { ascending: true });
+
+      if (error) {
+        alert("Error loading entries: " + error.message);
+        return;
+      }
+
+      const labels = data.map(e => new Date(e.recorded_at).toLocaleString());
+      const values = data.map(e => e.value);
 
       if (chart) chart.destroy();
+      const ctx = document.getElementById("datasetChart").getContext("2d");
       chart = new Chart(ctx, {
-        type: 'line',
+        type: "line",
         data: {
-          labels: points.map((_, i) => i+1),
-          datasets: [{label: name, data: points, borderColor:"#2563eb", backgroundColor:"#93c5fd"}]
+          labels,
+          datasets: [{
+            label: "Values",
+            data: values,
+            borderColor: "#2563eb",
+            backgroundColor: "rgba(37,99,235,0.2)",
+            fill: true,
+            tension: 0.3
+          }]
         }
       });
+    }
+
+    // --- Update chart when dataset changes ---
+    document.getElementById("datasetSelect").addEventListener("change", (e) => {
+      loadChart(e.target.value);
     });
   </script>
 </body>
