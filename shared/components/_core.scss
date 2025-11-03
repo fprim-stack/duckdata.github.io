@@ -1,0 +1,476 @@
+// ------------------------------------------------------------
+// Core
+// ------------------------------------------------------------
+// This file contains standardized layout and structuring information that is used across most sites.
+//
+// * Things that this file DOES control are initializing standards and defining utility classes that
+// you should not have to bother defining in other places and will not change between implementations.
+//
+// * Things that this file DOES NOT control include anything related to the individual snippet choices 
+// from canvas and any styling declarations. These should be handled in _overrides.scss
+//
+// While most of these components should be included automatically and work without any effort as part 
+// of the standard site layout, styles marked with "UTILITY CLASS" can be declared on a per-case basis 
+// to use their desired effects, often from _within_ canvas itself.
+
+// Initializing baseline fonts/sizes
+// ------------------------------------------------------------
+
+body, body .dark, body .light, body table, body .neutral, body .pale {
+	font-family: $primary-font;
+	font-size: 100%;
+}
+
+// High level structure
+// ------------------------------------------------------------
+
+html {
+	@include sticky-footer-layout;
+}
+
+body {	
+	min-width: $vp-small;
+	background-color: $jack-white;
+	color: $jack-black; 
+}
+
+// Header layout 
+// ------------------------------------------------------------
+
+.site-header {
+	@include flex-all($direction: column, $align: center);
+	position: relative;
+	z-index: 99;
+
+	.header-main-inner {
+		@include width-constrain;
+		@include flex-all($direction: column, $align: center);
+		position: relative;
+	}
+
+	.skip-to-content-link {	@include skip-to-content; }
+
+	.topbar { 
+		@include order(-1);
+		width: 100%;
+	}
+
+	.topbar-inner {
+		@include width-constrain;
+		@include flex-all($wrap: wrap, $justify: space-around, $align: center);
+
+		> * { 
+			margin: {
+				top: 5px;
+				bottom: 5px;
+			}
+		}
+
+		@include respond-to($vp-large) {
+			height: 45px;
+		}
+	}
+
+	.header-secondary-nav { 
+
+		.section-title {
+			margin: {
+				top: 0;
+				bottom: 15px;
+			}
+			font: {
+				weight: 400;
+				size: 1.5rem;
+			}
+		}
+
+		.links-list { 
+			@include stripped-list;
+			@include flex-all($wrap: wrap, $align: center, $justify: center);  
+		}
+
+		.link-item {
+			margin: 0 6px;
+
+			a { @include hover-underline; }
+		}
+	}
+
+	.header-logo {
+		&.logo-replacement a { @include image-replace($header-logo-width, $header-logo-height, $header-logo-image); }
+
+		&:not(.logo-replacement) a {
+			@include pseudo{
+				@include flex(none);
+				@include bg-contain;
+				width: $header-logo-width;
+				height: $header-logo-height;
+				margin-bottom: 15px;
+				background-image: url('#{$header-logo-image}');
+			}
+		}
+	}
+
+	.header-title a {
+		@include inline-flex-all($direction: column, $justify: center, $align: center);
+		max-width: 100%;
+		text-decoration: none;
+
+		.school-name-inner { max-width: 100%; }
+	}
+
+	.marquee { @include marquee-base; }
+
+	.sitenav-holder {
+
+		&.column {
+			@include accessible-menu-column-layout($nav-cols);
+		}
+		
+		&.megamenu {
+			@include accessible-megamenu-layout($nav-cols);
+
+			.contact-info {
+				@include flex-direction(column);
+				@include align-items(flex-start);
+				margin: 1em;
+
+				.header-contact-link { 
+					@include inline-flex;
+					padding: 0;
+				}
+			}
+
+			.map-container {
+				position: relative;
+				display: block;
+				margin: 1em;
+				min-height: 250px;
+
+				iframe {
+					position: absolute;
+					top: 0;
+					left: 0;
+					width: 100%;
+					height: 100%;
+				}
+			}
+
+			@include respond-to($vp-large) {
+				.contact-info { 
+					margin: 0 0 0 1em; 
+					padding: .5em;
+					width: 40%!important;
+				}
+				.map-container { margin: 0; }
+			}
+		}
+	}
+
+	// UTILITY CLASS 
+	//
+	// Can be added to the "classes" list in Canvas on the HEADER snippet
+	// for it to be position: fixed on desktop sizes.
+	&.fixed-header {
+		@include respond-to($vp-large) {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+		}
+	}
+}
+
+// Inside page shuffle styling (if defined in Header snippet)
+// ------------------------------------------------------------
+.content-pages-banner {
+	@include flex(none);
+	@include hide-mid;
+	@include bg-cover;
+	width: 100%;
+
+	.caption { @include hidden; }
+}
+
+
+// index.jsp H1 tag 
+// ------------------------------------------------------------
+
+.index-title { @include hidden; }
+
+
+// Inside page standard layout and primary index content container 
+// ------------------------------------------------------------
+
+#content_main {
+	@include content-main;
+	margin: {
+		top: 20px;
+		bottom: 20px;
+	}
+	background-color: $jack-white;
+	box-shadow: rgba($jack-black, .15) 0 0 15px;
+		
+	.index & {
+		background-color: transparent;
+		box-shadow: none;
+	}
+
+	.right-column-page-navigation {
+		@include pagenav-layout;
+	}
+}
+
+// Index page canvas content layout 
+// ------------------------------------------------------------
+
+.homepage-row {
+
+	&.bg-image { @include bg-cover; }
+
+	.homepage-row-inner {
+		position: relative;
+		
+		@include respond-to($vp-large) {
+			@include flexbox;
+		}
+	}
+
+	.homepage-column {
+		@include flex(1);
+		max-width: 100%;
+	}
+}
+
+// UTILITY CLASS 
+//
+// Can be added to the "classes" list in Canvas on a content
+// row for it to be width-constrain (modify max-width in overrides.scss to change
+// it from $site-width if necessary).
+.width-constrain-row {
+	.homepage-row-inner {
+		@include respond-to($vp-large) {
+			@include width-constrain;
+		}
+	}
+}
+
+// Generic index page content containers 
+// ------------------------------------------------------------
+
+.content-container {
+	padding: {
+		top: 25px;
+		bottom: 25px;
+	}
+
+	a { @include hover-underline; }
+
+	.section-title {
+		margin: {
+			top: 0;
+			bottom: 25px;
+		}
+		font: {
+			weight: 400;
+			size: 2rem;
+		}
+		text-align: center;
+		
+		a {
+			display: inline-block;
+			width: auto;
+			margin: 0;
+			padding: 0;
+			color: inherit;
+		}
+	}
+
+	@include respond-to($vp-mid) {
+		padding: {
+			top: 40px;
+			bottom: 40px;
+		}
+
+		.section-title { 
+			margin-bottom: 40px; 
+			font-size: 3rem;
+		}
+	}
+
+	@include respond-to($vp-large) {	
+		width: 100%;
+	}
+}
+
+.item-summary {
+	box-sizing: border-box;
+	padding: {
+		left: 10px;
+		right: 10px;
+	}
+
+	@include respond-to($vp-large) {
+		padding: {
+			left: 0;
+			right: 0;
+		}
+		max-width: 100%;
+	}
+}
+
+.read-more-links-group { @include flex-all($justify: center); }
+
+// Footer layout 
+// ------------------------------------------------------------
+
+.site-footer {
+	.footer-inner { 
+		@include width-constrain; 
+		text-align: center;
+	}
+
+	.footer-logo {
+		@include flex-all($direction: column, $align: center);
+		@include flex(none);
+		margin-bottom: 15px;
+
+		&.logo-replacement { @include image-replace($footer-logo-width, $footer-logo-height, $footer-logo-image); }
+
+		&:not(.logo-replacement) {
+
+			@include pseudo {
+				@include flex(none);
+				@include bg-contain;
+				width: $footer-logo-width;
+				height: $footer-logo-height;
+				margin-bottom: 15px;
+				background-image: url('#{$footer-logo-image}');
+			}
+
+			&.logo-orientation-horizontal {
+				@include respond-to($vp-mid) {
+					@include flex-direction(row);
+					@include justify-content(center);
+					&:before { 
+						margin: {
+							bottom: 0;
+							right: 15px;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	.footer-title {
+		font-size: .5rem;
+
+		.school-name-inner { max-width: 100%; }
+
+		@include respond-to($vp-mid) {
+			font-size: .75rem;
+		}
+
+		@include respond-to($vp-large) {
+			font-size: 1rem;
+		}
+	}
+
+	.footer-address {
+		@include flex-all($direction: column, $align: center, $wrap: wrap, $justify: space-around);
+		margin-bottom: 15px;
+		text-align: center;
+
+		a { color: inherit; }
+
+		svg {
+			width: 12px;
+			height: 12px;
+			margin-right: 5px;
+		}
+	}
+
+	.footer-secondary-nav { 
+		margin-bottom: 15px;
+
+		.section-title {
+			margin: {
+				top: 0;
+				bottom: 15px;
+			}
+			font: {
+				weight: 400;
+				size: 1.5rem;
+			}
+		}
+
+		.links-list { 
+			@include stripped-list;
+			@include flex-all($wrap: wrap, $align: center, $justify: center);  
+		}
+
+		.link-item {
+			margin: 0 6px;
+
+			a { @include hover-underline; }
+		}
+	}
+
+	.powered-by-edlio-logo {
+		@include svg-icon($width: 140px, $height: 20px);
+	}
+
+	.footer-bottom-inner {
+		@include width-constrain;
+		@include flex-all($justify: space-around, $align: center, $wrap: wrap);
+
+		> * {
+			margin: {
+				top: 5px;
+				bottom: 5px;
+			}
+		}
+	}
+}
+
+// Default layout for search fields 
+// ------------------------------------------------------------
+
+#search {
+	@include search-layout;
+}
+
+// Mobile-size-only footer navigation bar layout 
+// ------------------------------------------------------------
+
+#mobile_nav {
+	@include mobile-nav-layout;
+}
+
+// Edlio-branded admin login link 
+// ------------------------------------------------------------
+
+.edlio-login-link {
+	@include edlio-login-layout;
+}
+
+// Slick slider layout
+// UTILITY CLASS
+// 
+// This should be applied to ANY snippet with the isSlick option selected in canvas, but
+// will need to be added manually if modifying post-canvas compile.
+// ------------------------------------------------------------
+
+.slick-container {
+	@include slick-base;
+}
+
+// UTILITY CLASS
+// 
+// Anything with the following class will be hidden visually, but accessible programatically
+// ------------------------------------------------------------
+
+.hidden {
+	@include hidden;
+}
